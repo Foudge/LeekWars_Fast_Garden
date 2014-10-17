@@ -3,7 +3,9 @@
 // @namespace   LeekWars.Garden
 // @description Pour une gestion plus rapide des combats dans le potager.
 // @include     http://leekwars.com/garden
-// @version     0.1.0
+// @downloadURL https://github.com/Foudge/LeekWars_Fast_Garden/raw/master/LeekWars_Fast_Garden.user.js
+// @updateURL   https://github.com/Foudge/LeekWars_Fast_Garden/raw/master/LeekWars_Fast_Garden.user.js
+// @version     0.1.1
 // @grant       none
 // ==/UserScript==
 
