@@ -5,7 +5,7 @@
 // @include     http://leekwars.com/garden
 // @downloadURL https://github.com/Foudge/LeekWars_Fast_Garden/raw/master/LeekWars_Fast_Garden.user.js
 // @updateURL   https://github.com/Foudge/LeekWars_Fast_Garden/raw/master/LeekWars_Fast_Garden.user.js
-// @version     0.1.1
+// @version     0.1.2
 // @grant       none
 // ==/UserScript==
 
@@ -27,7 +27,7 @@ function decCount(id) {
 }
 
 /* Override submitForm function */
-unsafeWindow.submitForm = function(page, params){
+window.submitForm = function(page, params){
   var realParams = {};
   for (var p in params) {
     realParams[params[p][0]] = params[p][1];
@@ -150,7 +150,7 @@ window.addEventListener('load', function () {
   var links = menu.getElementsByTagName('a');
   for(var i=0; i<links.length; i++) {
     var href = links[i].getAttribute('href');
-    if (href.startsWith('/team/')) {
+    if (href.indexOf('/team/') != -1) {
       myTeamId = href.substr(6);
       console.log("myTeamId=" + myTeamId);
       break;
