@@ -5,7 +5,7 @@
 // @include     http://leekwars.com/garden
 // @downloadURL https://github.com/Foudge/LeekWars_Fast_Garden/raw/master/LeekWars_Fast_Garden.user.js
 // @updateURL   https://github.com/Foudge/LeekWars_Fast_Garden/raw/master/LeekWars_Fast_Garden.user.js
-// @version     0.1.3
+// @version     0.1.4
 // @grant       none
 // ==/UserScript==
 
@@ -111,6 +111,7 @@ function checkFightResult(fight)
             duration = $("<div/>").html(duration).text();
           console.log(duration);
           fight.descTurns = duration;
+          if (el) el.title = duration;
           var index = -1;
           if (fight.type == FightTypeEnum.SOLO)
             index = res.indexOf("<a href='/leek/" + fight.myId, i1);
@@ -118,7 +119,6 @@ function checkFightResult(fight)
             index = res.indexOf("<a href='/leek/" + myFirstLeekId, i1);
           else if (fight.type == FightTypeEnum.TEAM)
             index = res.indexOf("<a href='/team/" + myTeamId, i1);
-          console.log("checkFightResult: index=" + index + " i2=" + i2);
           if (index == -1) {
             console.log("Echec de l'analyse du rapport de combat");
             return;
