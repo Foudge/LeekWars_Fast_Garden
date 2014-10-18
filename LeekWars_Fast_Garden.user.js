@@ -5,7 +5,7 @@
 // @include     http://leekwars.com/garden
 // @downloadURL https://github.com/Foudge/LeekWars_Fast_Garden/raw/master/LeekWars_Fast_Garden.user.js
 // @updateURL   https://github.com/Foudge/LeekWars_Fast_Garden/raw/master/LeekWars_Fast_Garden.user.js
-// @version     0.1.2
+// @version     0.1.3
 // @grant       none
 // ==/UserScript==
 
@@ -41,6 +41,10 @@ window.submitForm = function(page, params){
   if (!!realParams.enemy_id) fightType = FightTypeEnum.SOLO;
   if (!!realParams.target_farmer) fightType = FightTypeEnum.FARMER;
   if (!!realParams.target_team) fightType = FightTypeEnum.TEAM;
+  if (fightType == FightTypeEnum.UNDEFINED) {
+    console.log('Combat annulé car de type inconnu');
+    return;
+  }
   //vérifier si combat déjà lancé
   for (var i = 0; i < fights.length; i++) {
     if (fights[i].targetId == targetId) {
@@ -55,7 +59,7 @@ window.submitForm = function(page, params){
   $.post('/' + page, realParams, function (response) {
     var success = getTitle(response).toLowerCase().indexOf('combat') != - 1;
     console.log(name + ': ' + (success ? 'SUCCESS' : 'FAILED'));
-    if (success && fightType != FightTypeEnum.UNDEFINED) {
+    if (success) {
       if (fightType == FightTypeEnum.SOLO) decCount('tab-solo');
       if (fightType == FightTypeEnum.FARMER) decCount('tab-farmer');
       if (fightType == FightTypeEnum.TEAM) decCount('tab-team');
@@ -66,6 +70,10 @@ window.submitForm = function(page, params){
       console.log('fightId=' + fightId);
       var fight = { 'targetId':targetId, 'fightId':fightId, 'myId':myId, 'type':fightType, 'descTurns':null, 'result':ResultEnum.UNDEFINED };
       fights.push(fight);
+    } else {
+      console.log('Adversaire ' + name + ' retiré de la liste car plus proposé dans le potager');
+      var el = $('#' + targetId);
+      if (el) el.remove();
     }
   });
   $.get('/garden');
