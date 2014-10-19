@@ -143,7 +143,7 @@ function checkFightResult(fight)
             else
             {
               $("<br>").appendTo(el);
-              report = $('<div class="button" id="report">').appendTo(el).html("Rapport de combat");
+              report = $('<img src="http://static.leekwars.com/image/fight_black.png" id="report">').appendTo(el).html("Rapport de combat");
             }
             $(report).on('click',function(e){
               e.stopPropagation();
