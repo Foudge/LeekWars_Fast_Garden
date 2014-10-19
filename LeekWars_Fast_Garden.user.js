@@ -146,16 +146,12 @@ function checkFightResult(fight)
             var report = $("#report",el)[0];
             if(typeof(report) != "undefined")
             {
-              $(report).off('click')
+              $(report).attr("href",'/report/' + fight.fightId);
             }
             else
             {
-              report = $('<div><img src="http://static.leekwars.com/image/fight_black.png" alt="image combat" title="Rapport de combat" id="report" onmouseover="this.style.opacity=0.30" onmouseout="this.style.opacity=0.20" style="opacity: 0.20;" ></div>').appendTo(el);
+              report = $('<div><a id="report" target="_blank" href="/report/' + fight.fightId + '"><img src="http://static.leekwars.com/image/fight_black.png" alt="image combat" title="Rapport de combat" onmouseover="this.style.opacity=0.30" onmouseout="this.style.opacity=0.20" style="opacity: 0.20;" ></a></div>').appendTo(el);
             }
-            $(report).on('click',function(e){
-              e.stopPropagation();
-              window.open('/report/' + fight.fightId, '_blank');
-            });
           }
         }
   });
