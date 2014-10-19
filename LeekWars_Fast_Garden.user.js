@@ -6,7 +6,7 @@
 // @include     http://leekwars.com/index.php?page=garden
 // @downloadURL https://github.com/Foudge/LeekWars_Fast_Garden/raw/master/LeekWars_Fast_Garden.user.js
 // @updateURL   https://github.com/Foudge/LeekWars_Fast_Garden/raw/master/LeekWars_Fast_Garden.user.js
-// @version     0.2.0
+// @version     0.2.1
 // @grant       none
 // ==/UserScript==
 
@@ -192,6 +192,14 @@ window.addEventListener('load', function () {
   refresh_button.onclick = function () { location.reload(); };
   var buttons = document.getElementById('garden-left');
   buttons.insertBefore(refresh_button, buttons.firstChild);
+  // remplace les avatars manquant par celui par défaut
+  var images = document.getElementById('garden-right').getElementsByTagName('img');
+  for(var i=0; i<images.length; i++) {
+    if (images[i].src.indexOf("no_avatar.png") != -1) {
+      console.log("avatar=" + images[i].src);
+      images[i].src = "http://i2.wp.com/static.leekwars.com/image/no_avatar.png";
+    }
+  }
   //lancement du timer de révifications des combats
   setInterval(function(){checkFights()}, 3000);
 }, false);
