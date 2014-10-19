@@ -46,16 +46,6 @@ window.submitForm = function(page, params){
     console.log('Combat annulé car de type inconnu');
     return;
   }
-  //vérifier si combat déjà lancé
-  for (var i = 0; i < fights.length; i++) {
-    if (fights[i].targetId == targetId) {
-      //si terminé ouvrir le rapport dans un nouvel onglet, sinon ne rien faire
-      if (fights[i].result != ResultEnum.UNDEFINED) {
-        window.open('/report/' + fights[i].fightId, '_blank');
-      }
-      return;
-    }
-  }
   console.log('Lancement du combat contre ' + name + '...');
   //petit changement d'apparence pour indiquer qu'un combat est lancé
   var el = $('#' + targetId)[0];
@@ -141,6 +131,24 @@ function checkFightResult(fight)
             console.log("Défaite !");
             fight.result = ResultEnum.DEFEAT;
             if (el) el.style.backgroundColor = ColorEnum.DEFEAT;
+          }
+          if (el) 
+          {
+            // Mise à jour du lien du rapport
+            var report = $("#report",el)[0];
+            if(typeof(report) != "undefined")
+            {
+              $(report).off('click')
+            }
+            else
+            {
+              $("<br>").appendTo(el);
+              report = $('<img src="http://static.leekwars.com/image/fight_black.png" id="report">').appendTo(el).html("Rapport de combat");
+            }
+            $(report).on('click',function(e){
+              e.stopPropagation();
+              window.open('/report/' + fight.fightId, '_blank');
+            });
           }
         }
   });
