@@ -6,7 +6,7 @@
 // @include     http://leekwars.com/index.php?page=garden
 // @downloadURL https://github.com/Foudge/LeekWars_Fast_Garden/raw/master/LeekWars_Fast_Garden.user.js
 // @updateURL   https://github.com/Foudge/LeekWars_Fast_Garden/raw/master/LeekWars_Fast_Garden.user.js
-// @version     0.1.6
+// @version     0.2.0
 // @grant       none
 // ==/UserScript==
 
@@ -167,6 +167,7 @@ var ColorEnum = { UNDEFINED:"rgb(242, 242, 242)", EQUALITY:"rgb(220, 220, 220)",
 var fights = [];
 var myFirstLeekId = 0;
 var myTeamId = 0;
+
 //wait page loaded
 window.addEventListener('load', function () {
   myFirstLeekId = $("div.leek.myleek").attr("id");
@@ -181,5 +182,16 @@ window.addEventListener('load', function () {
       break;
     }
   }
+  //creating refresh-button
+  var refresh_button = document.createElement('div');
+  refresh_button.className = 'button';
+  refresh_button.style.setProperty('padding', '8px', null);
+  refresh_button.style.setProperty('margin', '0px 16px', null);
+  refresh_button.id = 'refresh-button';
+  refresh_button.innerHTML = 'Recharger le potager';
+  refresh_button.onclick = function () { location.reload(); };
+  var buttons = document.getElementById('garden-left');
+  buttons.insertBefore(refresh_button, buttons.firstChild);
+  //lancement du timer de révifications des combats
   setInterval(function(){checkFights()}, 3000);
 }, false);
