@@ -142,7 +142,7 @@ function checkFightResult(fight)
             }
             else
             {
-              report = $('<div><img src="http://static.leekwars.com/image/fight_black.png" alt="img combat" title="Rapport de combat" id="report"></div>').appendTo(el).html("Rapport de combat");
+              report = $('<div><img src="http://static.leekwars.com/image/fight_black.png" alt="image combat" title="Rapport de combat" id="report" onmouseover="this.style.opacity=0.30" onmouseout="this.style.opacity=0.20" style="opacity: 0.20;" ></div>').appendTo(el);
             }
             $(report).on('click',function(e){
               e.stopPropagation();
