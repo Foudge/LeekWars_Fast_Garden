@@ -102,6 +102,8 @@ function checkFightResult(fight)
             console.log("Egalité !");
             fight.result = ResultEnum.EQUALITY;
             if (el) el.style.backgroundColor = ColorEnum.EQUALITY;
+            el.title = "Durée : 64 Tours";
+            $('<div>').appendTo(el).html(el.title);
             return;
           }
           var i3 = res.indexOf("<div id='duration'>") + 19;
@@ -111,7 +113,11 @@ function checkFightResult(fight)
             duration = $("<div/>").html(duration).text();
           console.log(duration);
           fight.descTurns = duration;
-          if (el) el.title = duration;
+          if (el)
+          {
+              el.title = duration;
+              $('<div>').appendTo(el).html(duration);
+          }
           var index = -1;
           if (fight.type == FightTypeEnum.SOLO)
             index = res.indexOf("<a href='/leek/" + fight.myId, i1);
