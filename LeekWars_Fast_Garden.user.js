@@ -6,7 +6,7 @@
 // @include     http://leekwars.com/index.php?page=garden
 // @downloadURL https://github.com/Foudge/LeekWars_Fast_Garden/raw/master/LeekWars_Fast_Garden.user.js
 // @updateURL   https://github.com/Foudge/LeekWars_Fast_Garden/raw/master/LeekWars_Fast_Garden.user.js
-// @version     0.2.1
+// @version     0.2.2
 // @grant       none
 // ==/UserScript==
 
@@ -45,6 +45,14 @@ window.submitForm = function(page, params){
   if (fightType == FightTypeEnum.UNDEFINED) {
     console.log('Combat annulé car de type inconnu');
     return;
+  }
+  //ne rien faire si combat en cours + blocage des combats multiples en SOLO
+  for (var i = 0; i < fights.length; i++) {
+    if (fights[i].targetId == targetId) {
+      //si terminé ouvrir le rapport dans un nouvel onglet, sinon ne rien faire
+      if (fights[i].result == ResultEnum.UNDEFINED || fights[i].type == FightTypeEnum.SOLO)
+        return;
+    }
   }
   console.log('Lancement du combat contre ' + name + '...');
   //petit changement d'apparence pour indiquer qu'un combat est lancé
