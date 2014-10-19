@@ -3,9 +3,10 @@
 // @namespace   LeekWars.Garden
 // @description Pour une gestion plus rapide des combats dans le potager.
 // @include     http://leekwars.com/garden
+// @include     http://leekwars.com/index.php?page=garden
 // @downloadURL https://github.com/Foudge/LeekWars_Fast_Garden/raw/master/LeekWars_Fast_Garden.user.js
 // @updateURL   https://github.com/Foudge/LeekWars_Fast_Garden/raw/master/LeekWars_Fast_Garden.user.js
-// @version     0.1.4
+// @version     0.1.5
 // @grant       none
 // ==/UserScript==
 
@@ -56,6 +57,13 @@ window.submitForm = function(page, params){
     }
   }
   console.log('Lancement du combat contre ' + name + '...');
+  //petit changement d'apparence pour indiquer qu'un combat est lancé
+  var el = $('#' + targetId)[0];
+  if (el)
+  {
+    el.style.backgroundColor = "white";
+    el.style.border = "1px dashed black";
+  }
   $.post('/' + page, realParams, function (response) {
     var success = getTitle(response).toLowerCase().indexOf('combat') != - 1;
     console.log(name + ': ' + (success ? 'SUCCESS' : 'FAILED'));
@@ -96,6 +104,8 @@ function checkFightResult(fight)
             return;
           }
           var el = $('#' + fight.targetId)[0];
+          if (el) el.style.border = "";
+          else console.log("Elément de l'adversaire " + fight.targetId + "non trouvé !");
           var i1 = res.indexOf("<h3>Gagnants</h3>");
           var i2 = res.indexOf("<h3>Perdants</h3>");
           if (i1 == -1 || i2 == -1) {
