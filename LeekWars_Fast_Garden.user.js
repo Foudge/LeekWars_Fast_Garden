@@ -6,7 +6,7 @@
 // @include     http://leekwars.com/index.php?page=garden
 // @downloadURL https://github.com/Foudge/LeekWars_Fast_Garden/raw/master/LeekWars_Fast_Garden.user.js
 // @updateURL   https://github.com/Foudge/LeekWars_Fast_Garden/raw/master/LeekWars_Fast_Garden.user.js
-// @version     0.1.5
+// @version     0.1.6
 // @grant       none
 // ==/UserScript==
 
@@ -142,8 +142,7 @@ function checkFightResult(fight)
             }
             else
             {
-              $("<br>").appendTo(el);
-              report = $('<img src="http://static.leekwars.com/image/fight_black.png" id="report">').appendTo(el).html("Rapport de combat");
+              report = $('<div><img src="http://static.leekwars.com/image/fight_black.png" alt="img combat" title="Rapport de combat" id="report"></div>').appendTo(el).html("Rapport de combat");
             }
             $(report).on('click',function(e){
               e.stopPropagation();
