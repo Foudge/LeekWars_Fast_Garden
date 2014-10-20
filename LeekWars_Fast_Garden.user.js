@@ -6,7 +6,7 @@
 // @include     http://leekwars.com/index.php?page=garden
 // @downloadURL https://github.com/Foudge/LeekWars_Fast_Garden/raw/master/LeekWars_Fast_Garden.user.js
 // @updateURL   https://github.com/Foudge/LeekWars_Fast_Garden/raw/master/LeekWars_Fast_Garden.user.js
-// @version     0.2.4
+// @version     0.2.5
 // @grant       none
 // ==/UserScript==
 
@@ -110,6 +110,7 @@ function checkFightResult(fight)
             console.log("Egalité !");
             fight.result = ResultEnum.EQUALITY;
             if (el) el.style.backgroundColor = ColorEnum.EQUALITY;
+            addReportLink(el, fight.fightId);
             return;
           }
           var i3 = res.indexOf("<div id='duration'>") + 19;
@@ -140,25 +141,30 @@ function checkFightResult(fight)
             fight.result = ResultEnum.DEFEAT;
             if (el) el.style.backgroundColor = ColorEnum.DEFEAT;
           }
-          if (el) 
-          {
-            // Mise à jour du lien du rapport
-            var report = $("#report",el)[0];
-            if(typeof(report) != "undefined")
-            {
-              $(report).off('click')
-            }
-            else
-            {
-              report = $('<div><img src="http://static.leekwars.com/image/fight_black.png" alt="image combat" title="Rapport de combat" id="report" onmouseover="this.style.opacity=0.30" onmouseout="this.style.opacity=0.20" style="opacity: 0.20;" ></div>').appendTo(el);
-            }
-            $(report).on('click',function(e){
-              e.stopPropagation();
-              window.open('/report/' + fight.fightId, '_blank');
-            });
-          }
+          addReportLink(el, fight.fightId);
         }
   });
+}
+
+function addReportLink(el, fightId)
+{
+  if (el)
+  {
+    // Mise à jour du lien du rapport
+    var report = $("#report",el)[0];
+    if(typeof(report) != "undefined")
+    {
+      $(report).off('click')
+    }
+    else
+    {
+      report = $('<div><img src="http://static.leekwars.com/image/fight_black.png" alt="image combat" title="Rapport de combat" id="report" onmouseover="this.style.opacity=0.80" onmouseout="this.style.opacity=0.40" style="opacity: 0.40;" ></div>').appendTo(el);
+    }
+    $(report).on('click',function(e){
+      e.stopPropagation();
+      window.open('/report/' + fightId, '_blank');
+    });
+  }
 }
 
 function checkFights()
