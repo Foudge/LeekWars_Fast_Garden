@@ -6,7 +6,7 @@
 // @include     http://leekwars.com/index.php?page=garden
 // @downloadURL https://github.com/Foudge/LeekWars_Fast_Garden/raw/master/LeekWars_Fast_Garden.user.js
 // @updateURL   https://github.com/Foudge/LeekWars_Fast_Garden/raw/master/LeekWars_Fast_Garden.user.js
-// @version     0.2.5
+// @version     0.2.6
 // @grant       none
 // ==/UserScript==
 
@@ -113,14 +113,10 @@ function checkFightResult(fight)
             addReportLink(el, fight.fightId);
             return;
           }
-          var i3 = res.indexOf("<div id='duration'>") + 19;
-          var i4 = res.indexOf("</div>", i3);
-          var duration = res.substr(i3, i4 - i3);
-          if (duration.indexOf('&') != -1)
-            duration = $("<div/>").html(duration).text();
+          var $res = $(res);
+          var duration = $res.find("#duration").text();
           console.log(duration);
           fight.descTurns = duration;
-          if (el) el.title = duration;
           var index = -1;
           if (fight.type == FightTypeEnum.SOLO)
             index = res.indexOf("<a href='/leek/" + fight.myId, i1);
@@ -140,6 +136,17 @@ function checkFightResult(fight)
             console.log("Défaite !");
             fight.result = ResultEnum.DEFEAT;
             if (el) el.style.backgroundColor = ColorEnum.DEFEAT;
+          }
+          if (fight.type == FightTypeEnum.SOLO) {
+            var talent;
+            if (fight.result == ResultEnum.VICTORY)
+              talent = $res.find(".talent").first().text();
+            else
+              talent = $res.find(".talent").last().text();
+            console.log("Talent :" + talent);
+            if (el) el.title = duration + "\nTalent :" + talent;
+          } else {
+            if (el) el.title = duration;
           }
           addReportLink(el, fight.fightId);
         }
@@ -201,6 +208,7 @@ window.addEventListener('load', function () {
   refresh_button.className = 'button';
   refresh_button.style.setProperty('padding', '8px', null);
   refresh_button.style.setProperty('margin', '0px 16px', null);
+  refresh_button.style.width = "185px";
   refresh_button.id = 'refresh-button';
   refresh_button.innerHTML = 'Recharger le potager';
   refresh_button.onclick = function () { location.reload(); };
