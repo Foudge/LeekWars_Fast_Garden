@@ -4,9 +4,9 @@
 // @description Pour une gestion plus rapide des combats dans le potager.
 // @include     http://leekwars.com/garden
 // @include     http://leekwars.com/index.php?page=garden
-// @downloadURL https://github.com/Foudge/LeekWars_Fast_Garden/raw/master/LeekWars_Fast_Garden.user.js
-// @updateURL   https://github.com/Foudge/LeekWars_Fast_Garden/raw/master/LeekWars_Fast_Garden.user.js
-// @version     0.2.6
+// @downloadURL https://github.com/Foudge/LeekWars_Fast_Garden/raw/dev/LeekWars_Fast_Garden.user.js
+// @updateURL   https://github.com/Foudge/LeekWars_Fast_Garden/raw/dev/LeekWars_Fast_Garden.user.js
+// @version     0.0.1
 // @grant       none
 // ==/UserScript==
 
@@ -29,6 +29,12 @@ function decCount(id) {
 
 /* Override submitForm function */
 window.submitForm = function(page, params){
+  //demande annulé si combat en cours ou potager en cours de rechargement
+  if (loading == true) {
+    console.log('Combat en cours...');
+    return;
+  }
+  //récupération des paramètres
   var realParams = {};
   for (var p in params) {
     realParams[params[p][0]] = params[p][1];
@@ -37,7 +43,7 @@ window.submitForm = function(page, params){
   realParams.token = __TOKEN;
   var myId = realParams.leek_id || realParams.my_team || __FARMER_ID;
   var targetId = realParams.enemy_id || realParams.target_team || realParams.target_farmer;
-  var name = getName(targetId);
+  var targetName = getName(targetId);
   var fightType = FightTypeEnum.UNDEFINED;
   if (!!realParams.enemy_id) fightType = FightTypeEnum.SOLO;
   if (!!realParams.target_farmer) fightType = FightTypeEnum.FARMER;
@@ -46,43 +52,71 @@ window.submitForm = function(page, params){
     console.log('Combat annulé car de type inconnu');
     return;
   }
-  //ne rien faire si combat en cours + blocage des combats multiples en SOLO
-  for (var i = 0; i < fights.length; i++) {
-    if (fights[i].targetId == targetId) {
-      //si terminé ouvrir le rapport dans un nouvel onglet, sinon ne rien faire
-      if (fights[i].result == ResultEnum.UNDEFINED || fights[i].type == FightTypeEnum.SOLO)
-        return;
-    }
-  }
-  console.log('Lancement du combat contre ' + name + '...');
+  console.log('Lancement du combat contre ' + targetName + '...');
+  loading = true;
   //petit changement d'apparence pour indiquer qu'un combat est lancé
-  var el = $('#' + targetId)[0];
-  if (el)
-  {
-    el.style.backgroundColor = "white";
-    el.style.border = "1px dashed black";
-  }
+  $('#' + targetId).css({ backgroundColor: "white", border: "1px dashed black" });
+  $("div.enemies[leek='" + myId + "']").find(".leek.enemy").not('#' + targetId).css({ opacity: 0.3 });
   $.post('/' + page, realParams, function (response) {
     var success = getTitle(response).toLowerCase().indexOf('combat') != - 1;
-    console.log(name + ': ' + (success ? 'SUCCESS' : 'FAILED'));
+    console.log(targetName + ': ' + (success ? 'SUCCESS' : 'FAILED'));
     if (success) {
       if (fightType == FightTypeEnum.SOLO) decCount('tab-solo');
       if (fightType == FightTypeEnum.FARMER) decCount('tab-farmer');
       if (fightType == FightTypeEnum.TEAM) decCount('tab-team');
       //récupération du fight id
+      //j'suis sûr qu'il y a un moyen simple&propre de récupérer __ID !!!
       var i1 = response.indexOf("<script>var __ID");
       var i2 = response.indexOf("<\/script>", i1);
       var fightId = response.substring(i1+19, i2);
       console.log('fightId=' + fightId);
-      var fight = { 'targetId':targetId, 'fightId':fightId, 'myId':myId, 'type':fightType, 'descTurns':null, 'result':ResultEnum.UNDEFINED };
+      var fight = { 'targetId':targetId, 'targetName':targetName, 'fightId':fightId, 'myId':myId, 'type':fightType, 'result':ResultEnum.UNDEFINED };
       fights.push(fight);
     } else {
       console.log('Adversaire ' + name + ' retiré de la liste car plus proposé dans le potager');
       var el = $('#' + targetId);
-      if (el) el.remove();
+      if (el) el.css({ opacity: 0.3 });
     }
+    console.log("Rechargement du potager...");
+    reloadGarden(myId, fightType);
   });
-  $.get('/garden');
+}
+
+function reloadGarden(myId, fightType)
+{
+  $.get('/garden',  function (response) {
+    if (fightType == FightTypeEnum.SOLO) {
+      $("div.enemies[leek='" + myId + "']").find(".leek.enemy").remove();
+      $("div.enemies[leek='" + myId + "']").prepend($(response).find("div.enemies[leek='" + myId + "']").children());
+      // Click d'un adversaire
+      $(".leek.enemy").click(function() {
+        submitForm("garden_update", [
+          ['leek_id', myId],
+          ['enemy_id', $(this).attr('id')]
+        ]);
+      });
+    }
+    if (fightType == FightTypeEnum.FARMER)
+    {  
+      // Click d'un farmer
+      $('.farmer.enemy').click(function() {
+        submitForm("garden_update", [
+          ['target_farmer', $(this).attr('id')]
+        ]);
+      });
+    }
+    if (fightType == FightTypeEnum.TEAM) {
+      // Click d'une compo adverse
+      $('.enemyCompo').click(function() {
+        submitForm("garden_update", [
+          ['my_team', myId],
+          ['target_team', $(this).attr('id')]
+        ]);
+      });
+    }
+    loading = false;
+    console.log('Potager rechargé');
+  });
 }
 
 function checkFightResult(fight)
@@ -101,22 +135,18 @@ function checkFightResult(fight)
             console.log("Combat en cours de génération...");
             return;
           }
-          var el = $('#' + fight.targetId)[0];
-          if (el) el.style.border = "";
-          else console.log("Elément de l'adversaire " + fight.targetId + "non trouvé !");
+          var el = $("div.enemies[leek='" + fight.myId + "']");
           var i1 = res.indexOf("<h3>Gagnants</h3>");
           var i2 = res.indexOf("<h3>Perdants</h3>");
           if (i1 == -1 || i2 == -1) {
             console.log("Egalité !");
             fight.result = ResultEnum.EQUALITY;
-            if (el) el.style.backgroundColor = ColorEnum.EQUALITY;
-            addReportLink(el, fight.fightId);
+            addFightResult(el, fight, null);
             return;
           }
           var $res = $(res);
           var duration = $res.find("#duration").text();
           console.log(duration);
-          fight.descTurns = duration;
           var index = -1;
           if (fight.type == FightTypeEnum.SOLO)
             index = res.indexOf("<a href='/leek/" + fight.myId, i1);
@@ -131,47 +161,41 @@ function checkFightResult(fight)
           if (index < i2) {
             console.log("Victoire !");
             fight.result = ResultEnum.VICTORY;
-            if (el) el.style.backgroundColor = ColorEnum.VICTORY;
           } else {
             console.log("Défaite !");
             fight.result = ResultEnum.DEFEAT;
-            if (el) el.style.backgroundColor = ColorEnum.DEFEAT;
           }
+          var talent = null;
           if (fight.type == FightTypeEnum.SOLO) {
-            var talent;
             if (fight.result == ResultEnum.VICTORY)
               talent = $res.find(".talent").first().text();
             else
               talent = $res.find(".talent").last().text();
             console.log("Talent :" + talent);
-            if (el) el.title = duration + "\nTalent :" + talent;
-          } else {
-            if (el) el.title = duration;
           }
-          addReportLink(el, fight.fightId);
+          addFightResult(el, fight, duration, talent);
         }
   });
 }
 
-function addReportLink(el, fightId)
+function addFightResult(el, fight, duration, talent)
 {
-  if (el)
-  {
-    // Mise à jour du lien du rapport
-    var report = $("#report",el)[0];
-    if(typeof(report) != "undefined")
-    {
-      $(report).off('click')
-    }
-    else
-    {
-      report = $('<div><img src="http://static.leekwars.com/image/fight_black.png" alt="image combat" title="Rapport de combat" id="report" onmouseover="this.style.opacity=0.80" onmouseout="this.style.opacity=0.40" style="opacity: 0.40;" ></div>').appendTo(el);
-    }
-    $(report).on('click',function(e){
-      e.stopPropagation();
-      window.open('/report/' + fightId, '_blank');
-    });
-  }
+  if (fight.result == ResultEnum.UNDEFINED) return;
+  var class_name = "fight-history";
+  if (fight.result == ResultEnum.VICTORY) class_name = class_name + " win";
+  else if (fight.result == ResultEnum.DEFEAT) class_name = class_name + " defeat";
+  else if (fight.result == ResultEnum.AQUALITY) class_name = class_name + " draw";
+  
+  var $fightDiv = $("<div>", {class: class_name});
+  var $fightImg = $("<img>", {src: "http://static.leekwars.com/image/fight_black.png"});
+  var $fightLink = $("<a>", {href: "/report/" + fight.fightId});
+  var $enemyLink = $("<a>", {href: "/leek/" + fight.targetId, text: " " + fight.targetName });
+  $fightLink.append($fightImg);
+  $fightDiv.append($fightLink);
+  $fightDiv.append($enemyLink);
+  var fight_title = (talent === null) ? duration : (duration + "\nTalent :" + talent)
+  $fightDiv.prop('title', fight_title);
+  $("div.enemies[leek='" + fight.myId + "']").append($fightDiv);
 }
 
 function checkFights()
@@ -184,13 +208,19 @@ function checkFights()
 
 var FightTypeEnum = { UNDEFINED:0, SOLO:1, FARMER:2, TEAM:3 };
 var ResultEnum = { UNDEFINED:0, EQUALITY:1, VICTORY:2, DEFEAT:3 };
-var ColorEnum = { UNDEFINED:"rgb(242, 242, 242)", EQUALITY:"rgb(220, 220, 220)", VICTORY:"rgb(184, 255, 179)", DEFEAT:"rgb(255, 179, 174)" };
 var fights = [];
 var myFirstLeekId = 0;
 var myTeamId = 0;
+var loading = false;
 
 //wait page loaded
 window.addEventListener('load', function () {
+  //hide footer to maximize garden size
+  var footer = document.getElementById('footer');
+  footer.setAttribute('style', 'display: none;');
+  document.getElementById('page').style.setProperty('height', window.innerHeight - 150 + 'px', null);
+  document.getElementById('wrapper').setAttribute('style', 'max-width: 1100px');
+  // récupération d'infos sur l'éleveur
   myFirstLeekId = $("div.leek.myleek").attr("id");
   console.log("myFirstLeekId=" + myFirstLeekId);
   var menu = document.getElementById('menu');
@@ -203,17 +233,6 @@ window.addEventListener('load', function () {
       break;
     }
   }
-  //creating refresh-button
-  var refresh_button = document.createElement('div');
-  refresh_button.className = 'button';
-  refresh_button.style.setProperty('padding', '8px', null);
-  refresh_button.style.setProperty('margin', '0px 16px', null);
-  refresh_button.style.width = "185px";
-  refresh_button.id = 'refresh-button';
-  refresh_button.innerHTML = 'Recharger le potager';
-  refresh_button.onclick = function () { location.reload(); };
-  var buttons = document.getElementById('garden-left');
-  buttons.insertBefore(refresh_button, buttons.firstChild);
   // remplace les avatars manquant par celui par défaut
   var images = document.getElementById('garden-right').getElementsByTagName('img');
   for(var i=0; i<images.length; i++) {
