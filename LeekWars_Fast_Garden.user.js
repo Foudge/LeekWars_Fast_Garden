@@ -6,7 +6,7 @@
 // @include     http://leekwars.com/index.php?page=garden
 // @downloadURL https://github.com/Foudge/LeekWars_Fast_Garden/raw/dev/LeekWars_Fast_Garden.user.js
 // @updateURL   https://github.com/Foudge/LeekWars_Fast_Garden/raw/dev/LeekWars_Fast_Garden.user.js
-// @version     0.0.1
+// @version     0.0.2
 // @grant       none
 // ==/UserScript==
 
@@ -56,14 +56,17 @@ window.submitForm = function(page, params){
   loading = true;
   //petit changement d'apparence pour indiquer qu'un combat est lancé
   $('#' + targetId).css({ backgroundColor: "white", border: "1px dashed black" });
-  $("div.enemies[leek='" + myId + "']").find(".leek.enemy").not('#' + targetId).css({ opacity: 0.3 });
+  if (fightType == FightTypeEnum.SOLO) $("div.enemies[leek='" + myId + "']").find(".leek.enemy").not('#' + targetId).css({ opacity: 0.3 });
+  else if (fightType == FightTypeEnum.FARMER) $("#farmers").find(".enemy.farmer").not('#' + targetId).css({ opacity: 0.3 });
+  else if (fightType == FightTypeEnum.TEAM) $("div.enemies-compos[compo='" + myId + "']").find(".enemyCompo").css({ opacity: 0.3 });
   $.post('/' + page, realParams, function (response) {
     var success = getTitle(response).toLowerCase().indexOf('combat') != - 1;
     console.log(targetName + ': ' + (success ? 'SUCCESS' : 'FAILED'));
     if (success) {
       if (fightType == FightTypeEnum.SOLO) decCount('tab-solo');
-      if (fightType == FightTypeEnum.FARMER) decCount('tab-farmer');
-      if (fightType == FightTypeEnum.TEAM) decCount('tab-team');
+      else if (fightType == FightTypeEnum.FARMER) decCount('tab-farmer');
+      else if (fightType == FightTypeEnum.TEAM) decCount('tab-team');
+      if (fightType != FightTypeEnum.FARMER) decCount(myId);
       //récupération du fight id
       //j'suis sûr qu'il y a un moyen simple&propre de récupérer __ID !!!
       var i1 = response.indexOf("<script>var __ID");
@@ -96,16 +99,19 @@ function reloadGarden(myId, fightType)
         ]);
       });
     }
-    if (fightType == FightTypeEnum.FARMER)
-    {  
+    else if (fightType == FightTypeEnum.FARMER) {
+      $("#farmers").find(".enemy.farmer").remove();
+      $("#farmers").prepend($(response).find("#farmers").children());
       // Click d'un farmer
-      $('.farmer.enemy').click(function() {
+      $('.enemy.farmer').click(function() {
         submitForm("garden_update", [
           ['target_farmer', $(this).attr('id')]
         ]);
       });
     }
-    if (fightType == FightTypeEnum.TEAM) {
+    else if (fightType == FightTypeEnum.TEAM) {
+      $("div.enemies-compos[compo='" + myId + "']").find(".enemyCompo").remove();
+      $("div.enemies-compos[compo='" + myId + "']").prepend($(response).find("div.enemies-compos[compo='" + myId + "']").children());
       // Click d'une compo adverse
       $('.enemyCompo').click(function() {
         submitForm("garden_update", [
@@ -135,18 +141,18 @@ function checkFightResult(fight)
             console.log("Combat en cours de génération...");
             return;
           }
+          var $res = $(res);
+          var duration = $res.find("#duration").text();
+          console.log(duration);
           var el = $("div.enemies[leek='" + fight.myId + "']");
           var i1 = res.indexOf("<h3>Gagnants</h3>");
           var i2 = res.indexOf("<h3>Perdants</h3>");
           if (i1 == -1 || i2 == -1) {
             console.log("Egalité !");
             fight.result = ResultEnum.EQUALITY;
-            addFightResult(el, fight, null);
+            addFightResult(el, fight, duration);
             return;
           }
-          var $res = $(res);
-          var duration = $res.find("#duration").text();
-          console.log(duration);
           var index = -1;
           if (fight.type == FightTypeEnum.SOLO)
             index = res.indexOf("<a href='/leek/" + fight.myId, i1);
@@ -165,7 +171,7 @@ function checkFightResult(fight)
             console.log("Défaite !");
             fight.result = ResultEnum.DEFEAT;
           }
-          var talent = null;
+          var talent;
           if (fight.type == FightTypeEnum.SOLO) {
             if (fight.result == ResultEnum.VICTORY)
               talent = $res.find(".talent").first().text();
@@ -184,8 +190,7 @@ function addFightResult(el, fight, duration, talent)
   var class_name = "fight-history";
   if (fight.result == ResultEnum.VICTORY) class_name = class_name + " win";
   else if (fight.result == ResultEnum.DEFEAT) class_name = class_name + " defeat";
-  else if (fight.result == ResultEnum.AQUALITY) class_name = class_name + " draw";
-  
+  else if (fight.result == ResultEnum.EQUALITY) class_name = class_name + " draw";
   var $fightDiv = $("<div>", {class: class_name});
   var $fightImg = $("<img>", {src: "http://static.leekwars.com/image/fight_black.png"});
   var $fightLink = $("<a>", {href: "/report/" + fight.fightId});
@@ -193,9 +198,11 @@ function addFightResult(el, fight, duration, talent)
   $fightLink.append($fightImg);
   $fightDiv.append($fightLink);
   $fightDiv.append($enemyLink);
-  var fight_title = (talent === null) ? duration : (duration + "\nTalent :" + talent)
+  var fight_title = (talent === undefined) ? duration : (duration + "\nTalent :" + talent)
   $fightDiv.prop('title', fight_title);
-  $("div.enemies[leek='" + fight.myId + "']").append($fightDiv);
+  if (fight.type == FightTypeEnum.SOLO) $("div.enemies[leek='" + fight.myId + "']").append($fightDiv);
+  else if (fight.type == FightTypeEnum.FARMER) $("#farmers").append($fightDiv);
+  else if (fight.type == FightTypeEnum.TEAM) $("div.enemies-compos[compo='" + myId + "']").append($fightDiv);
 }
 
 function checkFights()
