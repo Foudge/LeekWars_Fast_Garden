@@ -6,7 +6,7 @@
 // @include     http://leekwars.com/index.php?page=garden
 // @downloadURL https://github.com/Foudge/LeekWars_Fast_Garden/raw/dev/LeekWars_Fast_Garden.user.js
 // @updateURL   https://github.com/Foudge/LeekWars_Fast_Garden/raw/dev/LeekWars_Fast_Garden.user.js
-// @version     0.0.2
+// @version     0.0.3
 // @grant       none
 // ==/UserScript==
 
@@ -171,20 +171,27 @@ function checkFightResult(fight)
             console.log("Défaite !");
             fight.result = ResultEnum.DEFEAT;
           }
-          var talent;
+          var talent, xp, habs;
           if (fight.type == FightTypeEnum.SOLO) {
-            if (fight.result == ResultEnum.VICTORY)
+            if (fight.result == ResultEnum.VICTORY) {
+              xp = $res.find(".xp").first().find("span").text();
               talent = $res.find(".talent").first().text();
-            else
+              habs = $res.find(".money").first().find("span").first().text();
+            } else {
+              xp = $res.find(".xp").last().find("span").text();
               talent = $res.find(".talent").last().text();
+              habs = $res.find(".money").last().find("span").first().text();
+            }
             console.log("Talent :" + talent);
+            console.log("XP : " + xp);
+            console.log("Habs : " + habs);
           }
-          addFightResult(el, fight, duration, talent);
+          addFightResult(el, fight, duration, talent, xp, habs);
         }
   });
 }
 
-function addFightResult(el, fight, duration, talent)
+function addFightResult(el, fight, duration, talent, xp, habs)
 {
   if (fight.result == ResultEnum.UNDEFINED) return;
   var class_name = "fight-history";
@@ -198,11 +205,14 @@ function addFightResult(el, fight, duration, talent)
   $fightLink.append($fightImg);
   $fightDiv.append($fightLink);
   $fightDiv.append($enemyLink);
-  var fight_title = (talent === undefined) ? duration : (duration + "\nTalent :" + talent)
+  var fight_title = duration;
+  if (talent != undefined) fight_title += ("\nTalent :" + talent);
+  if (xp != undefined) fight_title += ("\nXP : " + xp);
+  if (habs != undefined) fight_title += ("\nHabs : " + habs);
   $fightDiv.prop('title', fight_title);
   if (fight.type == FightTypeEnum.SOLO) $("div.enemies[leek='" + fight.myId + "']").append($fightDiv);
   else if (fight.type == FightTypeEnum.FARMER) $("#farmers").append($fightDiv);
-  else if (fight.type == FightTypeEnum.TEAM) $("div.enemies-compos[compo='" + myId + "']").append($fightDiv);
+  else if (fight.type == FightTypeEnum.TEAM) $("div.enemies-compos[compo='" + fight.myId + "']").append($fightDiv);
 }
 
 function checkFights()
