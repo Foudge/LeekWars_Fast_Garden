@@ -6,7 +6,7 @@
 // @include     http://leekwars.com/index.php?page=garden
 // @downloadURL https://github.com/Foudge/LeekWars_Fast_Garden/raw/dev/LeekWars_Fast_Garden.user.js
 // @updateURL   https://github.com/Foudge/LeekWars_Fast_Garden/raw/dev/LeekWars_Fast_Garden.user.js
-// @version     0.0.3
+// @version     0.0.4
 // @grant       none
 // ==/UserScript==
 
@@ -171,21 +171,27 @@ function checkFightResult(fight)
             console.log("Défaite !");
             fight.result = ResultEnum.DEFEAT;
           }
-          var talent, xp, habs;
+          var talent, xp, habs, $stats;
           if (fight.type == FightTypeEnum.SOLO) {
-            if (fight.result == ResultEnum.VICTORY) {
-              xp = $res.find(".xp").first().find("span").text();
-              talent = $res.find(".talent").first().text();
-              habs = $res.find(".money").first().find("span").first().text();
-            } else {
-              xp = $res.find(".xp").last().find("span").text();
-              talent = $res.find(".talent").last().text();
-              habs = $res.find(".money").last().find("span").first().text();
-            }
-            console.log("Talent :" + talent);
-            console.log("XP : " + xp);
-            console.log("Habs : " + habs);
+            if (fight.result == ResultEnum.VICTORY)
+              $stats = $res.find(".report").first();
+            else
+              $stats = $res.find(".report").last();
+            xp = $stats.find(".xp").find("span").text();
+            talent = $stats.find(".talent").text();
+            habs = $stats.find(".money").find("span").first().text();
+          } else {
+            if (fight.result == ResultEnum.VICTORY)
+              $stats = $res.find(".total").first();
+            else
+              $stats = $res.find(".total").last();
+            xp = $stats.find(".xp").text();
+            talent = $stats.find(".talent").text();
+            habs = $stats.find(".money").find("span").first().text();
           }
+          console.log("Talent :" + talent);
+          console.log("XP : " + xp);
+          console.log("Habs : " + habs);
           addFightResult(el, fight, duration, talent, xp, habs);
         }
   });
