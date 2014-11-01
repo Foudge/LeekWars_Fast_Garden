@@ -6,7 +6,7 @@
 // @include     http://leekwars.com/index.php?page=garden
 // @downloadURL https://github.com/Foudge/LeekWars_Fast_Garden/raw/dev/LeekWars_Fast_Garden.user.js
 // @updateURL   https://github.com/Foudge/LeekWars_Fast_Garden/raw/dev/LeekWars_Fast_Garden.user.js
-// @version     0.0.5
+// @version     0.0.6
 // @grant       none
 // ==/UserScript==
 
@@ -74,6 +74,7 @@ window.submitForm = function(page, params){
       var fightId = response.substring(i1+19, i2);
       console.log('fightId=' + fightId);
       var fight = { 'targetId':targetId, 'targetName':targetName, 'fightId':fightId, 'myId':myId, 'type':fightType, 'result':ResultEnum.UNDEFINED };
+      addFightResult(fight);
       fights.push(fight);
     } else {
       console.log('Adversaire ' + name + ' retiré de la liste car plus proposé dans le potager');
@@ -197,12 +198,11 @@ function checkFightResult(fight)
 
 function addFightResult(fight, duration, talent, xp, habs)
 {
-  if (fight.result == ResultEnum.UNDEFINED) return;
   var class_name = "fight-history";
-  if (fight.result == ResultEnum.GENERATING) class_name += " generating";
-  else if (fight.result == ResultEnum.WIN) class_name += " win";
+  if (fight.result == ResultEnum.WIN) class_name += " win";
   else if (fight.result == ResultEnum.DEFEAT) class_name += " defeat";
   else if (fight.result == ResultEnum.DRAW) class_name += " draw";
+  else class_name += " generating";
   var $fightDiv = $("div.fight-history").find("a[href='/report/" + fight.fightId + "']");
   if ($fightDiv[0] == undefined) {
     $fightDiv = $("<div>", {class: class_name});
@@ -216,11 +216,14 @@ function addFightResult(fight, duration, talent, xp, habs)
     else if (fight.type == FightTypeEnum.FARMER) $("#farmers").append($fightDiv);
     else if (fight.type == FightTypeEnum.TEAM) $("div.enemies-compos[compo='" + fight.myId + "']").append($fightDiv);
   } else {
-    $fightDiv.parent().attr('class', class_name);
+    $fightDiv = $fightDiv.parent();
+    $fightDiv.attr('class', class_name);
   }
-  if (fight.result == ResultEnum.GENERATING) {
-    $fightDiv.prop('title', "Combat en cours de génération..");
-  } else {
+  if (fight.result == ResultEnum.UNDEFINED)
+    $fightDiv.prop('title', "En attente d'analyse du résultat...");
+  else if (fight.result == ResultEnum.GENERATING)
+    $fightDiv.prop('title', "Combat en cours de génération...");
+  else {
     var fight_title = duration;
     if (talent != undefined) fight_title += ("\nTalent :" + talent);
     if (xp != undefined) fight_title += ("\nXP : " + xp);
@@ -232,7 +235,7 @@ function addFightResult(fight, duration, talent, xp, habs)
 function checkFights()
 {
   for (var i=0; i<fights.length; i++) {
-    if (fights[i].result == ResultEnum.UNDEFINED)
+    if (fights[i].result == ResultEnum.UNDEFINED || fights[i].result == ResultEnum.GENERATING)
       checkFightResult(fights[i]);
   }
 }
