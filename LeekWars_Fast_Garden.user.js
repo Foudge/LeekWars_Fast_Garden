@@ -6,7 +6,7 @@
 // @include     http://leekwars.com/index.php?page=garden
 // @downloadURL https://github.com/Foudge/LeekWars_Fast_Garden/raw/dev/LeekWars_Fast_Garden.user.js
 // @updateURL   https://github.com/Foudge/LeekWars_Fast_Garden/raw/dev/LeekWars_Fast_Garden.user.js
-// @version     0.0.7
+// @version     0.0.8
 // @grant       GM_getValue
 // @grant       GM_setValue
 // @require     http://code.jquery.com/jquery-2.1.1.min.js
@@ -126,7 +126,7 @@ function reloadGarden(myId, fightType)
       $("div.enemies[leek='" + myId + "']").prepend($(response).find("div.enemies[leek='" + myId + "']").children());
       // Click d'un adversaire
       $(".leek.enemy").click(function() {
-        submitForm("garden_update", [
+        mySubmitForm("garden_update", [
           ['leek_id', myId],
           ['enemy_id', $(this).attr('id')]
         ]);
@@ -137,7 +137,7 @@ function reloadGarden(myId, fightType)
       $("#farmers").prepend($(response).find("#farmers").children());
       // Click d'un farmer
       $('.enemy.farmer').click(function() {
-        submitForm("garden_update", [
+        mySubmitForm("garden_update", [
           ['target_farmer', $(this).attr('id')]
         ]);
       });
@@ -147,7 +147,7 @@ function reloadGarden(myId, fightType)
       $("div.enemies-compos[compo='" + myId + "']").prepend($(response).find("div.enemies-compos[compo='" + myId + "']").children());
       // Click d'une compo adverse
       $('.enemyCompo').click(function() {
-        submitForm("garden_update", [
+        mySubmitForm("garden_update", [
           ['my_team', myId],
           ['target_team', $(this).attr('id')]
         ]);
