@@ -6,7 +6,7 @@
 // @include     http://leekwars.com/index.php?page=garden
 // @downloadURL https://github.com/Foudge/LeekWars_Fast_Garden/raw/dev/LeekWars_Fast_Garden.user.js
 // @updateURL   https://github.com/Foudge/LeekWars_Fast_Garden/raw/dev/LeekWars_Fast_Garden.user.js
-// @version     0.0.9
+// @version     0.0.10
 // @grant       GM_getValue
 // @grant       GM_setValue
 // @require     http://code.jquery.com/jquery-2.1.1.min.js
@@ -394,7 +394,7 @@ window.addEventListener('load', function () {
     for(var i=0; i<images.length; i++) {
       if (images[i].src.indexOf("no_avatar.png") != -1) {
         console.log("avatar=" + images[i].src);
-        images[i].src = "http://i2.wp.com/static.leekwars.com/image/no_avatar.png";
+        images[i].src = "http://static.leekwars.com/image/no_avatar.png";
       }
     }
   }
