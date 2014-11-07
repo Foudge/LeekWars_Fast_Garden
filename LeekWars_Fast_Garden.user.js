@@ -6,7 +6,7 @@
 // @include     http://leekwars.com/index.php?page=garden
 // @downloadURL https://github.com/Foudge/LeekWars_Fast_Garden/raw/dev/LeekWars_Fast_Garden.user.js
 // @updateURL   https://github.com/Foudge/LeekWars_Fast_Garden/raw/dev/LeekWars_Fast_Garden.user.js
-// @version     0.0.8
+// @version     0.0.9
 // @grant       GM_getValue
 // @grant       GM_setValue
 // @require     http://code.jquery.com/jquery-2.1.1.min.js
@@ -242,7 +242,10 @@ function addFightResult(fight, duration, talent, xp, habs)
     var fight_link = use_report_link ? ("/report/" + fight.fightId) : ("/fight/" + fight.fightId);
     var target_link = force_new_tab ? "_blank" : "_self";
     var $fightLink = $("<a>", {href: fight_link, target: target_link});
-    var $enemyLink = $("<a>", {href: "/leek/" + fight.targetId, text: " " + fight.targetName });
+    var $enemyLink = $("<a>", {text: " " + fight.targetName, target: target_link});
+    if (fight.type == FightTypeEnum.SOLO) $enemyLink.attr("href", "/leek/" + fight.targetId);
+    else if (fight.type == FightTypeEnum.FARMER) $enemyLink.attr("href", "/farmer/" + fight.targetId);
+    //else if (fight.type == FightTypeEnum.TEAM) $enemyLink.attr("href", "/team/" + fight.targetId); //le targetId est l'ID de composition et non de l'équipe!
     $fightLink.append($fightImg);
     $fightDiv.append($fightLink);
     $fightDiv.append($enemyLink);
