@@ -6,7 +6,7 @@
 // @include     http://leekwars.com/index.php?page=garden
 // @downloadURL https://github.com/Foudge/LeekWars_Fast_Garden/raw/dev/LeekWars_Fast_Garden.user.js
 // @updateURL   https://github.com/Foudge/LeekWars_Fast_Garden/raw/dev/LeekWars_Fast_Garden.user.js
-// @version     0.0.10
+// @version     0.0.11
 // @grant       GM_getValue
 // @grant       GM_setValue
 // @require     http://code.jquery.com/jquery-2.1.1.min.js
@@ -200,6 +200,27 @@ function checkFightResult(fight)
         fight.result = ResultEnum.DEFEAT;
       }
     }
+    
+    if(really_really_fast_garden){
+        //lancé le combat solo suivant
+        if($(".leek.enemy").size()>0){
+          var myNewId = $(".leek.enemy").first().parent().attr('leek');
+          console.log("relanching solo fight " + myNewId + " against " + $("div.enemies[leek='" + myNewId + "']").find(".leek.enemy").first().attr('id'));
+          mySubmitForm("garden_update", [
+                ['leek_id', myNewId],
+                ['enemy_id', $("div.enemies[leek='" + myNewId + "']").find(".leek.enemy").first().attr('id')]
+            ]);
+        //lancé le combat eleveur suivant
+        } else if($('.enemy.farmer').size()>0){
+          console.log("relanching farmer fight on " + $('.enemy.farmer').first().attr('id'));
+          mySubmitForm("garden_update", [
+              ['target_farmer', $('.enemy.farmer').first().attr('id')]
+            ]);
+        } else {
+          console.log("no more solo or farmer fights : " + $(".leek.enemy").size() + "-" + $('.enemy.farmer').size());
+        }
+    }
+    
     var $res = $(res);
     var duration = $res.find("#duration").text();
     console.log(duration);
@@ -303,7 +324,9 @@ function createSetupPopup()
     <input id='setting-tooltip' type='checkbox'>\
     <label for='setting-tooltip'>Afficher le résumé du combat dans une infobulle</label><br>\
     <input id='setting-fix-avatar' type='checkbox'>\
-    <label for='setting-fix-avatar'>Corriger le problème d'affichage de l'avatar par défaut</label>\
+    <label for='setting-fix-avatar'>Corriger le problème d'affichage de l'avatar par défaut</label>\<br>\
+    <input id='really_really_fast_garden' type='checkbox'>\
+    <label for='really_really_fast_garden'>Activer le really really fast garden</label>\
   </div>\
   <div class='actions' style='display: flex;'>\
     <div id='setting-ok'>OK</div>\
@@ -315,6 +338,7 @@ function createSetupPopup()
   if (force_new_tab) $setupDiv.find("#setting-newtab-link").prop('checked', true);
   if (show_tooltip) $setupDiv.find("#setting-tooltip").prop('checked', true);
   if (fix_avatar) $setupDiv.find("#setting-fix-avatar").prop('checked', true);
+  if (really_really_fast_garden) $setupDiv.find("#really_really_fast_garden").prop('checked', true);
   $setupDiv.find("#setting-ok").click(function(){saveSettingValues();$("#popups").css("display", "none");});
   $setupDiv.find("#setting-cancel").click(function(){$("#popups").css("display", "none");});
   $("#popups").find("td").append($setupDiv);
@@ -327,6 +351,7 @@ function loadSettingValues()
   force_new_tab = GM_getValue("force_new_tab", true);
   show_tooltip = GM_getValue("show_tooltip", true);
   fix_avatar = GM_getValue("fix_avatar", false);
+  really_really_fast_garden = GM_getValue("really_really_fast_garden", false);
 }
 
 function saveSettingValues()
@@ -343,11 +368,14 @@ function saveSettingValues()
     console.log("show_tooltip=" + show_tooltip);
     fix_avatar = $setupDiv.find("#setting-fix-avatar").prop('checked');
     console.log("fix_avatar=" + fix_avatar);
+    really_really_fast_garden = $setupDiv.find("#really_really_fast_garden").prop('checked');
+    console.log("really_really_fast_garden=" + really_really_fast_garden);
     GM_setValue("compact_mode", compact_mode);
     GM_setValue("use_report_link", use_report_link);
     GM_setValue("force_new_tab", force_new_tab);
     GM_setValue("show_tooltip", show_tooltip);
     GM_setValue("fix_avatar", fix_avatar);
+    GM_setValue("really_really_fast_garden", really_really_fast_garden);
   } else {
     console.log("setup-popup not found!");
   }  
@@ -360,7 +388,7 @@ var fights = [];
 var myFirstLeekId = 0;
 var myTeamId = 0;
 var loading = false;
-var compact_mode, use_report_link, force_new_tab, show_tooltip, fix_avatar;
+var compact_mode, use_report_link, force_new_tab, show_tooltip, fix_avatar, really_really_fast_garden;
 
 //wait page loaded
 window.addEventListener('load', function () {
