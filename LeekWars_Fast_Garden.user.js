@@ -61,7 +61,7 @@ function replaceSubmitForm()
 
 // My submitForm function
 function mySubmitForm(page, params){
-  //demande annulé si combat en cours ou potager en cours de rechargement
+  //demande annulée si combat en cours ou potager en cours de rechargement
   if (loading == true) {
     console.log('Combat en cours...');
     return;
@@ -189,7 +189,7 @@ function checkFightResult(fight)
       else if (fight.type == FightTypeEnum.TEAM)
         index = res.indexOf("<a href='/team/" + myTeamId, i1);
       if (index == -1) {
-        console.log("Echec de l'analyse du rapport du combat " + fight.fightId);
+        console.log("Échec de l'analyse du rapport du combat " + fight.fightId);
         return;
       }
       if (index < i2) {
@@ -202,17 +202,17 @@ function checkFightResult(fight)
     }
     
     if(really_really_fast_garden){
-        //lancé le combat solo suivant
+        //lancer le combat solo suivant
         if($(".leek.enemy").size()>0){
           var myNewId = $(".leek.enemy").first().parent().attr('leek');
-          console.log("relanching solo fight " + myNewId + " against " + $("div.enemies[leek='" + myNewId + "']").find(".leek.enemy").first().attr('id'));
+          console.log("relaunching solo fight " + myNewId + " against " + $("div.enemies[leek='" + myNewId + "']").find(".leek.enemy").first().attr('id'));
           mySubmitForm("garden_update", [
                 ['leek_id', myNewId],
                 ['enemy_id', $("div.enemies[leek='" + myNewId + "']").find(".leek.enemy").first().attr('id')]
             ]);
-        //lancé le combat eleveur suivant
+        //lancer le combat éleveur suivant
         } else if($('.enemy.farmer').size()>0){
-          console.log("relanching farmer fight on " + $('.enemy.farmer').first().attr('id'));
+          console.log("relaunching farmer fight on " + $('.enemy.farmer').first().attr('id'));
           mySubmitForm("garden_update", [
               ['target_farmer', $('.enemy.farmer').first().attr('id')]
             ]);
@@ -326,7 +326,7 @@ function createSetupPopup()
     <input id='setting-fix-avatar' type='checkbox'>\
     <label for='setting-fix-avatar'>Corriger le problème d'affichage de l'avatar par défaut</label>\<br>\
     <input id='really_really_fast_garden' type='checkbox'>\
-    <label for='really_really_fast_garden'>Activer le really really fast garden</label>\
+    <label for='really_really_fast_garden'>Lancement automatique des combats</label>\
   </div>\
   <div class='actions' style='display: flex;'>\
     <div id='setting-ok'>OK</div>\
@@ -416,7 +416,7 @@ window.addEventListener('load', function () {
   }
   // remplace submitForm par mySubmitForm
   replaceSubmitForm();
-  // remplace les avatars manquant par celui par défaut
+  // remplace les avatars manquants par celui par défaut
   if (fix_avatar) {
     var images = document.getElementById('garden-right').getElementsByTagName('img');
     for(var i=0; i<images.length; i++) {
@@ -426,6 +426,6 @@ window.addEventListener('load', function () {
       }
     }
   }
-  //lancement du timer de révifications des combats
+  //lancement du timer de vérification des combats
   setInterval(function(){checkFights()}, 3000);
 }, false);
