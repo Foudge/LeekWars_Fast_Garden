@@ -6,7 +6,7 @@
 // @include     http://leekwars.com/index.php?page=garden
 // @downloadURL https://github.com/Foudge/LeekWars_Fast_Garden/raw/dev/LeekWars_Fast_Garden.user.js
 // @updateURL   https://github.com/Foudge/LeekWars_Fast_Garden/raw/dev/LeekWars_Fast_Garden.user.js
-// @version     0.0.11
+// @version     0.0.12
 // @grant       GM_getValue
 // @grant       GM_setValue
 // @require     http://code.jquery.com/jquery-2.1.1.min.js
@@ -341,7 +341,7 @@ function createSetupPopup()
   if (really_really_fast_garden) $setupDiv.find("#really_really_fast_garden").prop('checked', true);
   $setupDiv.find("#setting-ok").click(function(){saveSettingValues();$("#popups").css("display", "none");});
   $setupDiv.find("#setting-cancel").click(function(){$("#popups").css("display", "none");});
-  $("#popups").find("td").append($setupDiv);
+  $("#popups").append($setupDiv);
 }
 
 function loadSettingValues()
